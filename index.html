@@ -17,13 +17,15 @@
       justify-content: center;
       color: #fff;
       overflow: hidden;
+      text-align: center;
     }
+
     h1 {
       font-size: 28px;
       margin-bottom: 25px;
       text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
-      animation: fadeIn 1s ease-in-out;
     }
+
     .spinner {
       width: 70px;
       height: 70px;
@@ -33,43 +35,45 @@
       animation: spin 1s linear infinite, glow 2s ease-in-out infinite alternate;
       box-shadow: 0 0 10px rgba(0,255,225,0.4);
     }
+
     .note {
       margin-top: 25px;
       font-size: 17px;
       opacity: 0.9;
-      animation: fadeInUp 1s ease-in-out;
     }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
     @keyframes glow {
       0% { box-shadow: 0 0 10px rgba(0,255,225,0.4); }
       100% { box-shadow: 0 0 25px rgba(0,255,225,0.8); }
     }
-    @keyframes fadeIn {
-      0% { opacity: 0; transform: translateY(-20px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeInUp {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
   </style>
   <script>
-    let redirectCount = 0;
-    let maxRedirects = 5; // ✅ ৫০ বার রিডাইরেক্ট হবে
-    let link = "https://wa.me/message/SSPWXJPHS367O1"; // 🔗 আপনার Adsterra Direct লিংক দিন
+    // ✅ এখানে সীমা সেট করো
+    const maxRedirects = 5; // ইচ্ছামতো সংখ্যা বাড়াতে বা কমাতে পারবে
+    const redirectUrl = "https://wa.me/message/SSPWXJPHS367O1"; // 🔗 এখানে তোমার আসল Adsterra লিংক বসাও
 
-    function redirectLoop() {
+    // লোকালস্টোরেজ থেকে বর্তমান কাউন্ট আনো
+    let redirectCount = localStorage.getItem('redirectCount') ? parseInt(localStorage.getItem('redirectCount')) : 0;
+
+    window.onload = function () {
       if (redirectCount < maxRedirects) {
         redirectCount++;
-        window.location.href = link;
-        setTimeout(redirectLoop, 2000); // প্রতি ২ সেকেন্ডে নতুন রিডাইরেক্ট
+        localStorage.setItem('redirectCount', redirectCount);
+        setTimeout(function () {
+          window.location.href = redirectUrl;
+        }, 1000); // ১ সেকেন্ড পর রিডাইরেক্ট
+      } else {
+        document.body.innerHTML = `
+          <h1>🚫 লিমিট শেষ হয়েছে</h1>
+          <p>আপনি আজকের সীমা পূর্ণ করেছেন। পরে চেষ্টা করুন।</p>
+        `;
       }
     }
-
-    setTimeout(redirectLoop, 1000); // ১ সেকেন্ড পর শুরু হবে
   </script>
 </head>
 <body>
