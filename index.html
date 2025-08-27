@@ -2,85 +2,76 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>লোড হচ্ছে...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>সার্ভিস বন্ধ</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #141e30, #243b55);
-      height: 100vh;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Arial', sans-serif;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
-      color: #fff;
-      overflow: hidden;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #ff416c, #ff4b2b);
+      color: white;
       text-align: center;
     }
-
+    .container {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 40px;
+      max-width: 400px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      animation: fadeIn 1.5s ease-in-out;
+    }
     h1 {
       font-size: 28px;
-      margin-bottom: 25px;
-      text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+      margin-bottom: 10px;
+      animation: pulse 2s infinite;
     }
-
-    .spinner {
-      width: 70px;
-      height: 70px;
-      border: 8px solid rgba(255, 255, 255, 0.2);
-      border-top: 8px solid #00ffe1;
-      border-radius: 50%;
-      animation: spin 1s linear infinite, glow 2s ease-in-out infinite alternate;
-      box-shadow: 0 0 10px rgba(0,255,225,0.4);
+    p {
+      font-size: 18px;
+      margin-top: 10px;
     }
-
-    .note {
-      margin-top: 25px;
-      font-size: 17px;
-      opacity: 0.9;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
     }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
     }
-
-    @keyframes glow {
-      0% { box-shadow: 0 0 10px rgba(0,255,225,0.4); }
-      100% { box-shadow: 0 0 25px rgba(0,255,225,0.8); }
+    .timer {
+      margin-top: 20px;
+      font-size: 24px;
+      font-weight: bold;
     }
   </style>
-  <script>
-    // ✅ এখানে সীমা সেট করো
-    const maxRedirects = 7; // ইচ্ছামতো সংখ্যা বাড়াতে বা কমাতে পারবে
-    const redirectUrl = "https://wa.me/message/SSPWXJPHS367O1"; // 🔗 এখানে তোমার আসল Adsterra লিংক বসাও
-
-    // লোকালস্টোরেজ থেকে বর্তমান কাউন্ট আনো
-    let redirectCount = localStorage.getItem('redirectCount') ? parseInt(localStorage.getItem('redirectCount')) : 0;
-
-    window.onload = function () {
-      if (redirectCount < maxRedirects) {
-        redirectCount++;
-        localStorage.setItem('redirectCount', redirectCount);
-        setTimeout(function () {
-          window.location.href = redirectUrl;
-        }, 1000); // ১ সেকেন্ড পর রিডাইরেক্ট
-      } else {
-        document.body.innerHTML = `
-          <h1>🚫 লিমিট শেষ হয়েছে</h1>
-          <p>আপনি আজকের সীমা পূর্ণ করেছেন। পরে চেষ্টা করুন।</p>
-        `;
-      }
-    }
-  </script>
 </head>
 <body>
+  <div class="container">
+    <h1>🚫 সার্ভিস সাময়িক বন্ধ</h1>
+    <p>আগামী 24 ঘন্টা কাজ বন্ধ থাকিবে।<br> অসুবিধার জন্য দুঃখিত।</p>
+    <div class="timer" id="countdown">24:00:00</div>
+  </div>
 
-  <h1>🔄 অনুগ্রহ করে অপেক্ষা করুন...</h1>
-  <div class="spinner"></div>
-  <div class="note">আপনাকে বিজ্ঞাপন লিংকে নিয়ে যাওয়া হচ্ছে...</div>
-
+  <script>
+    // Countdown Timer for 24 Hours
+    let time = 24 * 60 * 60; 
+    const countdownEl = document.getElementById('countdown');
+    setInterval(() => {
+      let hours = Math.floor(time / 3600);
+      let minutes = Math.floor((time % 3600) / 60);
+      let seconds = time % 60;
+      countdownEl.textContent = 
+        `${hours.toString().padStart(2, '0')}:` +
+        `${minutes.toString().padStart(2, '0')}:` +
+        `${seconds.toString().padStart(2, '0')}`;
+      if(time > 0) time--;
+    }, 1000);
+  </script>
 </body>
 </html>
