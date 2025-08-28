@@ -14,20 +14,19 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(-45deg, #1a1a1a, #222, #141414, #000);
+    background: linear-gradient(-45deg, #ff416c, #ff4b2b, #fcb045, #ff6f61);
     background-size: 400% 400%;
-    animation: bgAnimation 8s infinite;
-    overflow: hidden;
+    animation: gradient 10s ease infinite;
   }
 
-  @keyframes bgAnimation {
+  @keyframes gradient {
     0% {background-position: 0% 50%;}
     50% {background-position: 100% 50%;}
     100% {background-position: 0% 50%;}
   }
 
   .container {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.1);
     backdrop-filter: blur(14px);
     padding: 40px 30px;
     border-radius: 18px;
@@ -35,8 +34,8 @@
     color: #fff;
     max-width: 450px;
     width: 90%;
-    box-shadow: 0 0 30px rgba(255, 75, 43, 0.5);
-    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 0 25px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.2);
     animation: fadeIn 1.5s ease;
   }
 
@@ -49,7 +48,7 @@
     font-size: 60px;
     margin-bottom: 15px;
     animation: pulse 2s infinite;
-    color: #ff4b2b;
+    color: #fff;
   }
 
   @keyframes pulse {
@@ -62,37 +61,28 @@
     font-size: 28px;
     margin-bottom: 10px;
     font-weight: 600;
-    color: #ff4b2b;
   }
 
   p {
     font-size: 18px;
     margin-bottom: 25px;
-    color: #ddd;
-  }
-
-  .timer {
-    font-size: 38px;
-    font-weight: bold;
-    color: #fff;
-    text-shadow: 0 0 15px #ff4b2b, 0 0 30px #ff4b2b;
-    margin-bottom: 20px;
-    letter-spacing: 3px;
   }
 
   .btn {
     display: inline-block;
     padding: 12px 20px;
-    background: #ff4b2b;
-    color: #fff;
+    background: #fff;
+    color: #ff4b2b;
     font-size: 16px;
+    font-weight: bold;
     border-radius: 8px;
     text-decoration: none;
     transition: 0.3s;
   }
 
   .btn:hover {
-    background: #ff2e00;
+    background: #ff4b2b;
+    color: #fff;
     box-shadow: 0 0 15px #ff4b2b;
   }
 </style>
@@ -101,25 +91,8 @@
   <div class="container">
     <div class="icon">🚫</div>
     <h1>সার্ভিস সাময়িক বন্ধ</h1>
-    <p>আগামী ২৪ ঘন্টা কাজ বন্ধ থাকিবে।<br> অসুবিধার জন্য দুঃখিত।</p>
-    <div class="timer" id="countdown">24:00:00</div>
+    <p>আগামী ২৪ ঘন্টা কাজ বন্ধ থাকিবে<br> অসুবিধার জন্য দুঃখিত।</p>
     <a href="#" class="btn">হোমপেজে ফিরুন</a>
   </div>
-
-<script>
-  let time = 24 * 60 * 60; 
-  const countdownEl = document.getElementById('countdown');
-
-  setInterval(() => {
-    let hours = Math.floor(time / 3600);
-    let minutes = Math.floor((time % 3600) / 60);
-    let seconds = time % 60;
-    countdownEl.textContent = 
-      `${hours.toString().padStart(2, '0')}:` +
-      `${minutes.toString().padStart(2, '0')}:` +
-      `${seconds.toString().padStart(2, '0')}`;
-    if(time > 0) time--;
-  }, 1000);
-</script>
 </body>
 </html>
