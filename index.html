@@ -1,49 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="bn">
 <head>
-<meta charset="UTF-8">
-<title>6 Hour Lock</title>
-</head>
-<body style="text-align:center; margin-top:50px; font-family:sans-serif;">
-
-<h3>Start Task</h3>
-
-<button id="btn" onclick="doTask()" style="padding:15px 30px;font-size:18px;">
-Start
-</button>
-
-<p id="status"></p>
-
-<script>
-const LOCK_HOURS = 6;
-const LOCK_TIME = LOCK_HOURS * 60 * 60 * 1000;
-
-function doTask() {
-    const now = Date.now();
-    const saved = localStorage.getItem("task_time");
-
-    if (saved) {
-        const diff = now - Number(saved);
-
-        if (diff < LOCK_TIME) {
-            const remain = LOCK_TIME - diff;
-            const h = Math.floor(remain / (1000*60*60));
-            const m = Math.floor((remain % (1000*60*60)) / (1000*60));
-
-            document.getElementById("status").innerHTML =
-                "❌ আবার কাজ করতে পারবেন " + h + " ঘন্টা " + m + " মিনিট পর";
-            return;
-        }
+  <meta charset="UTF-8">
+  <title>Please Wait</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f4f6f8;
+      font-family: Arial, sans-serif;
     }
+    .message-box {
+      background: #ffffff;
+      padding: 25px 30px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .message-box h2 {
+      margin: 0 0 10px;
+      color: #333;
+    }
+    .message-box p {
+      margin: 0;
+      color: #666;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
 
-    // Allow task
-    localStorage.setItem("task_time", now);
-    document.getElementById("status").innerHTML =
-        "✅ Task accepted! 6 ঘন্টা পরে আবার আসুন।";
-
-    // 👉 এখানে earning / ad code বসাবে
-}
-</script>
+  <div class="message-box">
+    <h2>⏳ একটু সমস্যা হয়েছে</h2>
+    <p>কাজ করার জন্য অনুগ্রহ করে একটু অপেক্ষা করুন</p>
+  </div>
 
 </body>
 </html>
