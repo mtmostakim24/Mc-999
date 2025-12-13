@@ -1,79 +1,57 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>লোড হচ্ছে...</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #141e30, #243b55);
-      height: 100vh;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      overflow: hidden;
-    }
-
-    h1 {
-      font-size: 28px;
-      margin-bottom: 25px;
-      text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
-      animation: fadeIn 1s ease-in-out;
-    }
-
-    .spinner {
-      width: 70px;
-      height: 70px;
-      border: 8px solid rgba(255, 255, 255, 0.2);
-      border-top: 8px solid #00ffe1;
-      border-radius: 50%;
-      animation: spin 1s linear infinite, glow 2s ease-in-out infinite alternate;
-      box-shadow: 0 0 10px rgba(0,255,225,0.4);
-    }
-
-    .note {
-      margin-top: 25px;
-      font-size: 17px;
-      opacity: 0.9;
-      animation: fadeInUp 1s ease-in-out;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @keyframes glow {
-      0% { box-shadow: 0 0 10px rgba(0,255,225,0.4); }
-      100% { box-shadow: 0 0 25px rgba(0,255,225,0.8); }
-    }
-
-    @keyframes fadeIn {
-      0% { opacity: 0; transform: translateY(-20px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeInUp {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-  </style>
-  <script>
-    setTimeout(function () {
-      window.location.href = "https://bangla-new-natok24.blogspot.com"; // 🔗 এখানে আপনার আসল Adsterra Direct লিংক বসান
-    }, 1000); // ১০০০ মিলিসেকেন্ড = ১ সেকেন্ড
-  </script>
+<meta charset="UTF-8">
+<title>6 Hour Cooldown</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding-top: 50px;
+}
+button {
+    padding: 12px 25px;
+    font-size: 18px;
+}
+#msg {
+    margin-top: 20px;
+    color: red;
+}
+</style>
 </head>
 <body>
 
-  <h1>🔄 অনুগ্রহ করে অপেক্ষা করুন...</h1>
-  <div class="spinner"></div>
-  <div class="note">আপনাকে বিজ্ঞাপন নিয়ে যাওয়া হচ্ছে...</div>
+<h2>Task Button</h2>
+
+<button id="taskBtn" onclick="startTask()">Start Task</button>
+
+<div id="msg"></div>
+
+<script>
+const COOLDOWN_TIME = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
+
+function startTask() {
+    const lastTime = localStorage.getItem("lastTaskTime");
+    const now = new Date().getTime();
+
+    if (lastTime && (now - lastTime) < COOLDOWN_TIME) {
+        const remaining = COOLDOWN_TIME - (now - lastTime);
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+
+        document.getElementById("msg").innerHTML =
+            `❌ আবার কাজ করতে পারবেন ${hours} ঘন্টা ${minutes} মিনিট পর`;
+        return;
+    }
+
+    // Task allowed
+    localStorage.setItem("lastTaskTime", now);
+    document.getElementById("msg").style.color = "green";
+    document.getElementById("msg").innerHTML = "✅ Task started successfully!";
+    
+    // এখানে তোমার কাজ / ad / earning logic বসাবে
+}
+</script>
 
 </body>
 </html>
