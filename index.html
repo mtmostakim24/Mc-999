@@ -1,55 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>6 Hour Cooldown</title>
-<style>
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding-top: 50px;
-}
-button {
-    padding: 12px 25px;
-    font-size: 18px;
-}
-#msg {
-    margin-top: 20px;
-    color: red;
-}
-</style>
+<title>6 Hour Lock</title>
 </head>
-<body>
+<body style="text-align:center; margin-top:50px; font-family:sans-serif;">
 
-<h2>Task Button</h2>
+<h3>Start Task</h3>
 
-<button id="taskBtn" onclick="startTask()">Start Task</button>
+<button id="btn" onclick="doTask()" style="padding:15px 30px;font-size:18px;">
+Start
+</button>
 
-<div id="msg"></div>
+<p id="status"></p>
 
 <script>
-const COOLDOWN_TIME = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
+const LOCK_HOURS = 6;
+const LOCK_TIME = LOCK_HOURS * 60 * 60 * 1000;
 
-function startTask() {
-    const lastTime = localStorage.getItem("lastTaskTime");
-    const now = new Date().getTime();
+function doTask() {
+    const now = Date.now();
+    const saved = localStorage.getItem("task_time");
 
-    if (lastTime && (now - lastTime) < COOLDOWN_TIME) {
-        const remaining = COOLDOWN_TIME - (now - lastTime);
-        const hours = Math.floor(remaining / (1000 * 60 * 60));
-        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    if (saved) {
+        const diff = now - Number(saved);
 
-        document.getElementById("msg").innerHTML =
-            `❌ আবার কাজ করতে পারবেন ${hours} ঘন্টা ${minutes} মিনিট পর`;
-        return;
+        if (diff < LOCK_TIME) {
+            const remain = LOCK_TIME - diff;
+            const h = Math.floor(remain / (1000*60*60));
+            const m = Math.floor((remain % (1000*60*60)) / (1000*60));
+
+            document.getElementById("status").innerHTML =
+                "❌ আবার কাজ করতে পারবেন " + h + " ঘন্টা " + m + " মিনিট পর";
+            return;
+        }
     }
 
-    // Task allowed
-    localStorage.setItem("lastTaskTime", now);
-    document.getElementById("msg").style.color = "green";
-    document.getElementById("msg").innerHTML = "✅ Task started successfully!";
-    
-    // এখানে তোমার কাজ / ad / earning logic বসাবে
+    // Allow task
+    localStorage.setItem("task_time", now);
+    document.getElementById("status").innerHTML =
+        "✅ Task accepted! 6 ঘন্টা পরে আবার আসুন।";
+
+    // 👉 এখানে earning / ad code বসাবে
 }
 </script>
 
