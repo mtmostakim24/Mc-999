@@ -1,42 +1,580 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Please Wait</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #f4f6f8;
-      font-family: Arial, sans-serif;
-    }
-    .message-box {
-      background: #ffffff;
-      padding: 25px 30px;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .message-box h2 {
-      margin: 0 0 10px;
-      color: #333;
-    }
-    .message-box p {
-      margin: 0;
-      color: #666;
-      font-size: 15px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Tycoon Bot</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* আপনার আগের সব CSS একই থাকবে */
+        /* শুধু JavaScript অংশ পরিবর্তন করছি */
+    </style>
 </head>
 <body>
+    <!-- আপনার আগের সব HTML একই থাকবে -->
+    
+    <!-- নতুন JavaScript ডিবাগ ভার্সন -->
+    <script>
+        // ========== কনফিগারেশন ==========
+        const BOT_CONFIG = {
+            botUsername: "Spin_Dhora24_Bot",  // আপনার বটের ইউজারনেম
+            adminChatId: "6986255063"
+        };
+        
+        // ========== ডিবাগ লগ ==========
+        const DEBUG = true;  // true করলে কনসোলে সব দেখাবে
+        
+        function log(message, data = null) {
+            if (!DEBUG) return;
+            if (data) {
+                console.log(`🔍 [DEBUG] ${message}:`, data);
+            } else {
+                console.log(`🔍 [DEBUG] ${message}`);
+            }
+        }
+        
+        // ========== গ্লোবাল ভেরিয়েবল ==========
+        let userData = null;
+        let data = {
+            completed: 0,
+            remaining: 100,
+            todaysEarning: 0
+        };
 
-  <div class="message-box">
-    <h2>⏳ একটু সমস্যা হয়েছে</h2>
-    <p>কাজ করার জন্য অনুগ্রহ করে একটু অপেক্ষা করুন</p>
-  </div>
+        // ========== টেলিগ্রাম ওয়েবঅ্যাপ ==========
+        let tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            log("Telegram WebApp initialized", tg.initDataUnsafe);
+        } else {
+            log("Telegram WebApp not found - using demo mode");
+        }
 
+        // ========== মেইন ফাংশন ==========
+        window.addEventListener('DOMContentLoaded', function() {
+            log("DOM loaded - starting initialization");
+            initializeUser();
+            updateDisplay();
+            updateTaskVisualization();
+        });
+
+        // ========== ইউজার ইনিশিয়ালাইজ ==========
+        function initializeUser() {
+            log("=== STARTING USER INITIALIZATION ===");
+            
+            let user = null;
+            let referrerId = null;
+            
+            // টেলিগ্রাম ইউজার পাওয়ার চেষ্টা
+            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                user = tg.initDataUnsafe.user;
+                log("Telegram user found", user);
+                
+                // start_param চেক
+                if (tg.initDataUnsafe.start_param) {
+                    const startParam = tg.initDataUnsafe.start_param;
+                    log("Start param found", startParam);
+                    
+                    if (startParam.startsWith('ref_')) {
+                        referrerId = startParam.replace('ref_', '');
+                        log("✅ Referrer ID extracted from start_param", referrerId);
+                    } else {
+                        log("❌ Start param doesn't start with ref_", startParam);
+                    }
+                } else {
+                    log("❌ No start_param found in tg.initDataUnsafe");
+                    
+                    // URL চেক করা যাক
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const tgWebAppStartParam = urlParams.get('tgWebAppStartParam');
+                    if (tgWebAppStartParam) {
+                        log("Found tgWebAppStartParam in URL", tgWebAppStartParam);
+                        if (tgWebAppStartParam.startsWith('ref_')) {
+                            referrerId = tgWebAppStartParam.replace('ref_', '');
+                            log("✅ Referrer ID from URL", referrerId);
+                        }
+                    } else {
+                        log("No tgWebAppStartParam in URL");
+                    }
+                }
+            } else {
+                // ডেমো ইউজার
+                user = {
+                    id: Math.floor(Math.random() * 1000000) + 1000000,
+                    first_name: "Demo",
+                    last_name: "User",
+                    username: "demouser",
+                    photo_url: "https://via.placeholder.com/80"
+                };
+                log("Using demo user", user);
+            }
+
+            // ইউজার ডাটা লোড বা তৈরি
+            const storageKey = `userData_${user.id}`;
+            log("Checking storage key", storageKey);
+            
+            const savedData = localStorage.getItem(storageKey);
+
+            if (savedData) {
+                userData = JSON.parse(savedData);
+                log("Existing user loaded from localStorage", userData);
+            } else {
+                userData = {
+                    userId: user.id,
+                    firstName: user.first_name,
+                    lastName: user.last_name || '',
+                    username: user.username || '',
+                    photoUrl: user.photo_url || 'https://via.placeholder.com/80',
+                    lifetimeEarning: 0,
+                    withdrew: 0,
+                    totalTasks: 0,
+                    referrals: 0,
+                    referralEarnings: 0,
+                    referralHistory: [],
+                    joinDate: new Date().toISOString()
+                };
+                log("New user created", userData);
+                
+                // রেফারেল প্রসেস
+                if (referrerId) {
+                    log("Found referrerId for new user", referrerId);
+                    
+                    if (referrerId !== user.id.toString()) {
+                        log("✅ Valid referral - processing now", {
+                            referrerId: referrerId,
+                            newUserId: user.id
+                        });
+                        processNewReferral(referrerId, user.id);
+                    } else {
+                        log("❌ Self referral ignored", {
+                            referrerId: referrerId,
+                            userId: user.id
+                        });
+                    }
+                } else {
+                    log("No referrerId found - direct visit");
+                }
+
+                localStorage.setItem(storageKey, JSON.stringify(userData));
+            }
+
+            // টাস্ক ডাটা লোড
+            const today = new Date().toLocaleDateString();
+            const taskKey = `taskData_${user.id}_${today}`;
+            const savedTaskData = localStorage.getItem(taskKey);
+
+            if (savedTaskData) {
+                data = JSON.parse(savedTaskData);
+                log("Task data loaded", data);
+            } else {
+                data = {
+                    completed: 0,
+                    remaining: 100,
+                    todaysEarning: 0
+                };
+                localStorage.setItem(taskKey, JSON.stringify(data));
+                log("New task data created", data);
+            }
+            
+            log("=== USER INITIALIZATION COMPLETE ===");
+            log("Final userData", userData);
+            log("Final taskData", data);
+        }
+
+        // ========== রেফারেল প্রসেস ==========
+        function processNewReferral(referrerId, newUserId) {
+            log("=== PROCESSING NEW REFERRAL ===");
+            log("Referrer ID:", referrerId);
+            log("New User ID:", newUserId);
+            
+            // ভ্যালিডেশন
+            if (!referrerId || referrerId === '' || referrerId === 'undefined' || referrerId === 'null') {
+                log("❌ Invalid referrer ID");
+                return false;
+            }
+            
+            if (referrerId === newUserId.toString()) {
+                log("❌ Self referral ignored");
+                return false;
+            }
+            
+            const referrerKey = `userData_${referrerId}`;
+            log("Looking for referrer data at key:", referrerKey);
+            
+            const referrerData = localStorage.getItem(referrerKey);
+
+            if (referrerData) {
+                const referrer = JSON.parse(referrerData);
+                log("Referrer found", referrer);
+                
+                // চেক করুন আগে রেফার হয়েছে কিনা
+                const alreadyReferred = referrer.referralHistory && referrer.referralHistory.some(
+                    ref => ref.id === `User#${newUserId}`
+                );
+                
+                if (alreadyReferred) {
+                    log("❌ User already referred by this referrer");
+                    return false;
+                }
+                
+                // আপডেট করার আগের মান
+                log("Before update - Referrer stats:", {
+                    referrals: referrer.referrals,
+                    lifetimeEarning: referrer.lifetimeEarning,
+                    referralEarnings: referrer.referralEarnings
+                });
+                
+                // Add referral bonus
+                referrer.referrals = (referrer.referrals || 0) + 1;
+                referrer.lifetimeEarning = (referrer.lifetimeEarning || 0) + 1.00;
+                referrer.referralEarnings = (referrer.referralEarnings || 0) + 1.00;
+
+                // Add to referral history
+                if (!referrer.referralHistory) {
+                    referrer.referralHistory = [];
+                }
+
+                const newReferral = {
+                    id: `User#${newUserId}`,
+                    earned: 0,
+                    status: 'active',
+                    joinDate: new Date().toISOString()
+                };
+                
+                referrer.referralHistory.push(newReferral);
+                
+                // আপডেট করার পরের মান
+                log("After update - Referrer stats:", {
+                    referrals: referrer.referrals,
+                    lifetimeEarning: referrer.lifetimeEarning,
+                    referralEarnings: referrer.referralEarnings,
+                    newReferral: newReferral
+                });
+
+                localStorage.setItem(referrerKey, JSON.stringify(referrer));
+                log("✅ Referral added successfully and saved to localStorage");
+                
+                // রেফারারের জন্য নোটিফিকেশন
+                if (userData && referrerId !== userData.userId.toString()) {
+                    showNotification(`🎉 You earned $1.00 from a new referral!`, "success");
+                }
+                
+                return true;
+                
+            } else {
+                log("❌ Referrer not found in localStorage - saving as pending");
+                
+                // পেন্ডিং রেফারেল হিসেবে সংরক্ষণ
+                const pendingReferrals = JSON.parse(localStorage.getItem('pendingReferrals') || '[]');
+                const newPending = {
+                    referrerId: referrerId,
+                    newUserId: newUserId,
+                    timestamp: new Date().toISOString()
+                };
+                pendingReferrals.push(newPending);
+                localStorage.setItem('pendingReferrals', JSON.stringify(pendingReferrals));
+                log("Saved as pending referral", newPending);
+                
+                return false;
+            }
+        }
+
+        // ========== পেন্ডিং রেফারেল চেক ==========
+        function checkPendingReferrals() {
+            log("=== CHECKING PENDING REFERRALS ===");
+            
+            if (!userData) {
+                log("No userData - cannot check pending");
+                return;
+            }
+            
+            const pendingReferrals = JSON.parse(localStorage.getItem('pendingReferrals') || '[]');
+            log("Pending referrals found:", pendingReferrals.length);
+            
+            if (pendingReferrals.length === 0) {
+                return;
+            }
+            
+            const newPending = [];
+            let updated = false;
+            
+            pendingReferrals.forEach(pending => {
+                log("Checking pending:", pending);
+                
+                if (pending.referrerId === userData.userId.toString()) {
+                    log("✅ Found pending for current user");
+                    
+                    if (!userData.referralHistory) {
+                        userData.referralHistory = [];
+                    }
+                    
+                    const exists = userData.referralHistory.some(ref => ref.id === `User#${pending.newUserId}`);
+                    
+                    if (!exists) {
+                        userData.referrals = (userData.referrals || 0) + 1;
+                        userData.lifetimeEarning = (userData.lifetimeEarning || 0) + 1.00;
+                        userData.referralEarnings = (userData.referralEarnings || 0) + 1.00;
+                        
+                        userData.referralHistory.push({
+                            id: `User#${pending.newUserId}`,
+                            earned: 0,
+                            status: 'active',
+                            joinDate: pending.timestamp || new Date().toISOString()
+                        });
+                        
+                        log("✅ Added pending referral to user data");
+                        updated = true;
+                        showNotification(`🎉 You earned $1.00 from a new referral!`, "success");
+                    } else {
+                        log("Pending already exists in history");
+                    }
+                } else {
+                    newPending.push(pending);
+                }
+            });
+            
+            if (updated) {
+                localStorage.setItem('pendingReferrals', JSON.stringify(newPending));
+                localStorage.setItem(`userData_${userData.userId}`, JSON.stringify(userData));
+                log("Updated userData with pending referrals", userData);
+                updateDisplay();
+            } else {
+                log("No updates needed");
+            }
+        }
+
+        // ========== রেফারেল প্রগ্রেস আপডেট ==========
+        function updateReferralProgress(userId, amount) {
+            log("Updating referral progress", { userId, amount });
+            
+            const allKeys = Object.keys(localStorage);
+            let updatedCount = 0;
+            
+            allKeys.forEach(key => {
+                if (key.startsWith('userData_')) {
+                    try {
+                        const data = JSON.parse(localStorage.getItem(key));
+                        
+                        if (data.referralHistory && Array.isArray(data.referralHistory)) {
+                            let updated = false;
+                            
+                            data.referralHistory = data.referralHistory.map(ref => {
+                                if (ref.id === `User#${userId}`) {
+                                    const oldEarned = ref.earned;
+                                    ref.earned = (ref.earned || 0) + amount;
+                                    
+                                    if (ref.earned >= 30) {
+                                        ref.status = 'completed';
+                                    }
+                                    
+                                    updated = true;
+                                    updatedCount++;
+                                    log(`Updated referral earnings: ${oldEarned} -> ${ref.earned}`);
+                                }
+                                return ref;
+                            });
+                            
+                            if (updated) {
+                                localStorage.setItem(key, JSON.stringify(data));
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error updating referral progress:', e);
+                    }
+                }
+            });
+            
+            if (updatedCount > 0) {
+                log(`Updated ${updatedCount} referrer(s)`);
+            }
+        }
+
+        // ========== আপডেট ডিসপ্লে ==========
+        function updateDisplay() {
+            if (!userData) return;
+
+            const availableBalance = (userData.lifetimeEarning - userData.withdrew).toFixed(2);
+
+            // হেডার আপডেট
+            document.getElementById("header-balance").textContent = availableBalance;
+
+            // হোম প্রোফাইল
+            document.getElementById("user-name").textContent = userData.firstName + (userData.lastName ? ' ' + userData.lastName : '');
+            document.getElementById("display-user-id").textContent = userData.userId;
+            document.getElementById("today-earning").textContent = data.todaysEarning.toFixed(2);
+            document.getElementById("lifetime-earning").textContent = userData.lifetimeEarning.toFixed(2);
+            document.getElementById("total-tasks").textContent = userData.totalTasks;
+            document.getElementById("referral-count").textContent = userData.referrals || 0;
+
+            // রেফারেল লিংক - অটো জেনারেট
+            const refLink = `https://t.me/${BOT_CONFIG.botUsername}?start=ref_${userData.userId}`;
+            document.getElementById("referral-link").textContent = refLink;
+            document.getElementById("total-referrals").textContent = userData.referrals || 0;
+            document.getElementById("referral-earnings").textContent = (userData.referralEarnings || 0).toFixed(2);
+
+            // রেফারেল হিস্টোরি
+            updateReferralHistoryDisplay();
+        }
+
+        // ========== রেফারেল হিস্টোরি ডিসপ্লে ==========
+        function updateReferralHistoryDisplay() {
+            const historyList = document.getElementById("referral-history-list");
+            
+            if (!userData.referralHistory || userData.referralHistory.length === 0) {
+                historyList.innerHTML = '<div class="empty-history">No referral history yet</div>';
+                return;
+            }
+            
+            historyList.innerHTML = '';
+            
+            userData.referralHistory.forEach(referral => {
+                const historyItem = document.createElement("div");
+                historyItem.className = "history-item";
+                
+                const progressPercentage = Math.min(100, (referral.earned / 30) * 100);
+                
+                historyItem.innerHTML = `
+                    <div class="history-id">${referral.id}</div>
+                    <div class="history-earned">$${referral.earned.toFixed(2)}</div>
+                    <div class="history-status ${referral.status === 'active' ? 'status-active' : 'status-pending'}">${referral.status}</div>
+                `;
+                
+                historyList.appendChild(historyItem);
+            });
+            
+            log("Referral history updated", userData.referralHistory);
+        }
+
+        // ========== টাস্ক স্টার্ট ==========
+        function startTask() {
+            if (data.completed >= 100) {
+                showNotification("You have completed all tasks for today! Come back tomorrow.", "warning");
+                return;
+            }
+            
+            const start = Date.now();
+            const ad = window.open("https://www.google.com", "_blank"); // টেস্ট লিংক
+            
+            if (!ad) {
+                showNotification("Please allow popups to complete tasks", "error");
+                return;
+            }
+            
+            const check = setInterval(() => {
+                if (ad.closed) {
+                    clearInterval(check);
+                    const duration = (Date.now() - start) / 1000;
+                    
+                    if (duration >= 2) { // টেস্টের জন্য 2 সেকেন্ড
+                        data.completed++;
+                        data.remaining = 100 - data.completed;
+                        data.todaysEarning += 0.025;
+                        userData.lifetimeEarning += 0.025;
+                        userData.totalTasks++;
+                        
+                        // রেফারেল প্রগ্রেস আপডেট
+                        log("Task completed - updating referral progress");
+                        updateReferralProgress(userData.userId, 0.025);
+                        
+                        updateStorage();
+                        updateDisplay();
+                        updateTaskVisualization();
+                        
+                        showNotification("✅ Task completed! $0.025 added.", "success");
+                        
+                        if (data.completed === 100) {
+                            userData.lifetimeEarning += 1.00;
+                            updateStorage();
+                            updateDisplay();
+                            showNotification("🎉 Bonus earned!", "success");
+                        }
+                    } else {
+                        showNotification("⏱️ Please stay longer!", "error");
+                    }
+                }
+            }, 500);
+        }
+
+        // ========== অন্যান্য ফাংশন ==========
+        function updateStorage() {
+            localStorage.setItem(`userData_${userData.userId}`, JSON.stringify(userData));
+            const today = new Date().toLocaleDateString();
+            localStorage.setItem(`taskData_${userData.userId}_${today}`, JSON.stringify(data));
+        }
+
+        function updateTaskVisualization() {
+            // আপনার আগের কোড
+        }
+
+        function showNotification(message, type) {
+            // আপনার আগের কোড
+            console.log(`NOTIFICATION: ${message} (${type})`);
+        }
+
+        function copyReferralLink() {
+            const refLink = `https://t.me/${BOT_CONFIG.botUsername}?start=ref_${userData.userId}`;
+            navigator.clipboard.writeText(refLink)
+                .then(() => showNotification("✅ Link copied!", "success"))
+                .catch(() => showNotification("Failed to copy", "error"));
+        }
+
+        function show(section) {
+            // আপনার আগের কোড
+            if (section === 'profile') {
+                checkPendingReferrals();
+            }
+        }
+
+        // ========== ডিবাগ টুলস ==========
+        window.debugReferral = {
+            // বর্তমান স্ট্যাটাস দেখুন
+            status: function() {
+                console.log("=== REFERRAL DEBUG STATUS ===");
+                console.log("Bot Username:", BOT_CONFIG.botUsername);
+                console.log("Current User:", userData);
+                console.log("Task Data:", data);
+                
+                const pending = JSON.parse(localStorage.getItem('pendingReferrals') || '[]');
+                console.log("Pending Referrals:", pending);
+                
+                // সব ইউজার দেখান
+                const allUsers = [];
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('userData_')) {
+                        allUsers.push(JSON.parse(localStorage.getItem(key)));
+                    }
+                });
+                console.log("All Users in DB:", allUsers);
+            },
+            
+            // টেস্ট রেফারেল
+            testReferral: function(referrerId) {
+                if (!userData) {
+                    console.log("No user data");
+                    return;
+                }
+                console.log(`Testing referral from ${referrerId} to ${userData.userId}`);
+                processNewReferral(referrerId, userData.userId);
+            },
+            
+            // রেফারেল ডাটা রিসেট
+            reset: function() {
+                if (userData) {
+                    localStorage.removeItem(`userData_${userData.userId}`);
+                    localStorage.removeItem('pendingReferrals');
+                    console.log("Data reset - refresh page");
+                    location.reload();
+                }
+            },
+            
+            // ম্যানুয়ালি রেফারেল যোগ
+            addReferral: function(referrerId, newUserId) {
+                processNewReferral(referrerId, newUserId);
+            }
+        };
+
+        console.log("✅ Debug tools loaded - type 'debugReferral.status()' in console");
+    </script>
 </body>
 </html>
