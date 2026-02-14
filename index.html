@@ -1,1157 +1,562 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Task Tycoon Bot</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<metaname="viewport"content="width=dewidth, initialscale=1.0">
+  <title>অফার লোড হচ্ছে...</title>
   <style>
+    :root {
+      --primary: #6366F1;
+      --secondary: #8B5CF6;
+      --accent: #EC4899;
+      --glass: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --text: #F8FAFC;
+      --text-secondary: #94A3B8;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     body {
-      background: linear-gradient(145deg, #4776E6 0%, #8E54E9 100%);
-      color: white;
+      font-family: 'Segoe UI', 'Inter', sans-serif;
+      background: linear-gradient(135deg, #1E1B4B 0%, #312E81 100%);
       min-height: 100vh;
-      padding-bottom: 80px;
-    }
-
-    /* Header */
-    header {
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(10px);
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(255,255,255,0.2);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .logo {
-      font-size: 20px;
-      font-weight: bold;
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+      color: var(--text);
+      padding: 20px;
+      overflow-x: hidden;
     }
 
-    .balance {
-      background: rgba(255,255,255,0.2);
-      padding: 8px 15px;
-      border-radius: 25px;
-      font-weight: 600;
-      border: 1px solid rgba(255,255,255,0.3);
-    }
-
-    /* Profile Card */
-    .profile-card {
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(10px);
-      margin: 20px;
-      padding: 25px;
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-
-    .profile-row {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-
-    .profile-pic {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      border: 3px solid gold;
+    .glass-container {
+      width: 100%;
+      max-width: 500px;
+      background: var(--glass);
+      border-radius: 24px;
+      padding: 40px 35px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 
+        0 25px 45px rgba(0, 0, 0, 0.3),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+      position: relative;
       overflow: hidden;
     }
 
-    .profile-pic img {
+    .glass-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.4), 
+        transparent);
+    }
+
+    .floating-badge {
+      position: absolute;
+      top: -10px;
+      right: 30px;
+      background: linear-gradient(90deg, var(--accent), var(--primary));
+      color: white;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      box-shadow: 0 5px 15px rgba(236, 72, 153, 0.3);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      position: relative;
+      display: inline-block;
+    }
+
+    .title::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 25%;
+      width: 50%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      border-radius: 2px;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 16px;
+      line-height: 1.5;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .loader-section {
+      margin: 35px 0;
+    }
+
+    .orbital-loader {
+      width: 180px;
+      height: 180px;
+      margin: 0 auto 25px;
+      position: relative;
+    }
+
+    .orbit {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid transparent;
+    }
+
+    .orbit-1 {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      border-top: 2px solid var(--primary);
+      border-right: 2px solid transparent;
+      animation: orbitSpin 8s linear infinite;
     }
 
-    .profile-name h3 {
-      font-size: 20px;
-      margin-bottom: 5px;
+    .orbit-2 {
+      width: 70%;
+      height: 70%;
+      top: 15%;
+      left: 15%;
+      border-bottom: 2px solid var(--secondary);
+      border-left: 2px solid transparent;
+      animation: orbitSpinReverse 6s linear infinite;
     }
 
-    .profile-name p {
-      opacity: 0.9;
-      font-size: 14px;
+    .orbit-3 {
+      width: 40%;
+      height: 40%;
+      top: 30%;
+      left: 30%;
+      border-top: 2px solid var(--accent);
+      border-right: 2px solid transparent;
+      animation: orbitSpin 4s linear infinite;
     }
 
-    /* Stats Grid */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      margin-top: 15px;
+    .central-orb {
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 50%;
+      box-shadow: 
+        0 0 20px rgba(99, 102, 241, 0.5),
+        0 0 40px rgba(99, 102, 241, 0.3);
     }
 
-    .stat-box {
-      background: rgba(0,0,0,0.2);
-      padding: 15px;
-      border-radius: 15px;
+    .status-display {
       text-align: center;
+      margin: 20px 0;
     }
 
-    .stat-number {
-      font-size: 24px;
-      font-weight: bold;
-      color: gold;
-      margin-bottom: 5px;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      opacity: 0.8;
-    }
-
-    /* Cards */
-    .card {
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(10px);
-      margin: 20px;
-      padding: 20px;
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-
-    .card-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.2);
-    }
-
-    /* Progress Bar */
-    .progress-info {
-      display: flex;
-      justify-content: space-between;
+    .countdown-timer {
+      font-size: 64px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
       margin-bottom: 10px;
-      font-size: 14px;
+      text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      transition: color 0.3s ease;
     }
 
-    .progress-bar {
+    .status-text {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 15px;
+      min-height: 27px;
+    }
+
+    .progress-wrapper {
       width: 100%;
-      height: 12px;
-      background: rgba(0,0,0,0.3);
-      border-radius: 10px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
       overflow: hidden;
-      margin: 15px 0;
+      margin: 25px 0;
     }
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #4CAF50, #8BC34A);
-      border-radius: 10px;
-      transition: width 0.3s ease;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 3px;
+      transition: width 0.5s ease;
+      position: relative;
+      overflow: hidden;
     }
 
-    /* Task Visual */
-    .task-visual {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 5px;
-      margin: 20px 0;
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 30px;
+      background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0), 
+        rgba(255, 255, 255, 0.6), 
+        rgba(255, 255, 255, 0));
+      animation: shimmer 1.5s infinite;
     }
 
-    .task-dot {
-      aspect-ratio: 1;
-      border-radius: 4px;
-      background: rgba(255,255,255,0.2);
-      transition: 0.3s;
+    .action-panel {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
     }
 
-    .task-dot.completed {
-      background: #4CAF50;
-      box-shadow: 0 0 10px #4CAF50;
-    }
-
-    /* Buttons */
-    .btn {
-      width: 100%;
-      padding: 15px;
+    .action-btn {
+      flex: 1;
+      padding: 18px;
       border: none;
       border-radius: 12px;
       font-size: 16px;
-      font-weight: bold;
-      color: white;
+      font-weight: 600;
       cursor: pointer;
-      transition: 0.3s;
-      margin: 10px 0;
-    }
-
-    .btn-primary {
-      background: linear-gradient(145deg, #4CAF50, #45a049);
-    }
-
-    .btn-warning {
-      background: linear-gradient(145deg, #FF9800, #F57C00);
-    }
-
-    .btn-secondary {
-      background: linear-gradient(145deg, #2196F3, #1976D2);
-    }
-
-    .btn:active {
-      transform: scale(0.98);
-    }
-
-    /* Referral Section */
-    .referral-box {
-      background: rgba(76, 175, 80, 0.2);
-      padding: 15px;
-      border-radius: 12px;
-      border: 2px solid #4CAF50;
-      margin: 15px 0;
-    }
-
-    .referral-link {
-      background: rgba(0,0,0,0.3);
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      word-break: break-all;
-      margin: 10px 0;
-      font-family: monospace;
-    }
-
-    /* History */
-    .history-item {
-      background: rgba(0,0,0,0.2);
-      padding: 12px;
-      border-radius: 10px;
-      margin: 8px 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: center;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .badge {
-      padding: 4px 10px;
-      border-radius: 15px;
-      font-size: 11px;
-      font-weight: bold;
-    }
-
-    .badge-success {
-      background: #4CAF50;
-    }
-
-    .badge-warning {
-      background: #FF9800;
-    }
-
-    /* Bottom Navigation */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
+    .action-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
       width: 100%;
-      background: rgba(0,0,0,0.3);
-      backdrop-filter: blur(10px);
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 0;
-      border-top: 1px solid rgba(255,255,255,0.2);
+      height: 100%;
+      background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2), 
+        transparent);
+      transition: left 0.6s;
     }
 
-    .nav-item {
+    .action-btn:hover::before {
+      left: 100%;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+    }
+
+    .secondary-btn {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .action-btn:active {
+      transform: translateY(-1px);
+    }
+
+    .info-box {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 30px;
+      border-left: 4px solid var(--accent);
+    }
+
+    .info-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .info-text {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .footer {
       text-align: center;
-      flex: 1;
-      cursor: pointer;
-      opacity: 0.6;
-      transition: 0.3s;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+      font-size: 13px;
     }
 
-    .nav-item.active {
-      opacity: 1;
-      color: gold;
+    /* Animations */
+    @keyframes orbitSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
-    .nav-item i {
-      font-size: 20px;
-      display: block;
-      margin-bottom: 4px;
+    @keyframes orbitSpinReverse {
+      0% { transform: rotate(360deg); }
+      100% { transform: rotate(0deg); }
     }
 
-    .nav-item span {
-      font-size: 11px;
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(400%); }
     }
 
-    /* Sections */
-    .section {
-      display: none;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .section.active {
-      display: block;
-    }
-
-    /* Notification */
-    .notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #4CAF50;
-      color: white;
-      padding: 15px 25px;
-      border-radius: 10px;
-      z-index: 1000;
-      transform: translateX(150%);
-      transition: 0.3s;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-    }
-
-    .notification.show {
-      transform: translateX(0);
-    }
-
-    .notification.error {
-      background: #f44336;
-    }
-
-    .notification.warning {
-      background: #FF9800;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 8px;
-      color: white;
-    }
-
-    input::placeholder {
-      color: rgba(255,255,255,0.5);
-    }
-
-    select option {
-      background: #333;
-    }
-
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px;
-      background: rgba(0,0,0,0.1);
-      border-radius: 8px;
-      margin: 8px 0;
+    /* Responsive */
+    @media (max-width: 480px) {
+      .glass-container { padding: 30px 20px; }
+      .title { font-size: 26px; }
+      .countdown-timer { font-size: 48px; }
+      .orbital-loader { width: 150px; height: 150px; }
+      .action-panel { flex-direction: column; }
     }
   </style>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-
-<!-- Notification -->
-<div id="notification" class="notification">
-  <span id="notifMsg"></span>
-</div>
-
-<!-- Header -->
-<header>
-  <div class="logo">
-    <i class="fas fa-rocket" style="color: gold;"></i>
-    Task Tycoon
-  </div>
-  <div class="balance" id="headerBalance">
-    $0.00
-  </div>
-</header>
-
-<!-- MAIN CONTENT -->
-
-<!-- HOME SECTION -->
-<div id="homeSection" class="section active">
-  <!-- Profile Card -->
-  <div class="profile-card">
-    <div class="profile-row">
-      <div class="profile-pic">
-        <img id="profileImage" src="https://via.placeholder.com/80" alt="Profile">
-      </div>
-      <div class="profile-name">
-        <h3 id="userName">Loading...</h3>
-        <p>ID: <span id="userId">------</span></p>
-      </div>
+  <div class="glass-container">
+    <div class="floating-badge">এক্সক্লুসিভ অ্যাক্সেস</div>
+    
+    <div class="header">
+      <h1 class="title">প্রিমিয়াম অফার লোডিং</h1>
+      <p class="subtitle">
+        আপনার জন্য বিশেষভাবে নির্বাচিত এই অফারটি প্রস্তুত করা হচ্ছে। 
+        স্বয়ংক্রিয় রিডাইরেক্টের আগে আপনি এখনই অ্যাক্সেস করতে পারেন।
+      </p>
     </div>
     
-    <div class="stats-grid">
-      <div class="stat-box">
-        <div class="stat-number" id="todayEarn">$0.00</div>
-        <div class="stat-label">Today</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-number" id="totalEarn">$0.00</div>
-        <div class="stat-label">Total</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-number" id="totalTasks">0</div>
-        <div class="stat-label">Tasks</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-number" id="totalReferrals">0</div>
-        <div class="stat-label">Referrals</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Tasks Card -->
-  <div class="card">
-    <div class="card-title">
-      <i class="fas fa-tasks" style="color: gold;"></i>
-      <span>Daily Tasks</span>
-    </div>
-    
-    <div class="progress-info">
-      <span>Progress</span>
-      <span id="taskProgressText">0/100</span>
-    </div>
-    
-    <div class="progress-bar">
-      <div class="progress-fill" id="taskProgressBar" style="width: 0%"></div>
-    </div>
-    
-    <div class="task-visual" id="taskVisual"></div>
-    
-    <button class="btn btn-primary" onclick="startTask()">
-      <i class="fas fa-play"></i> Start Task ($0.025)
-    </button>
-  </div>
-
-  <!-- Daily Bonus Card -->
-  <div class="card">
-    <div class="card-title">
-      <i class="fas fa-gift" style="color: gold;"></i>
-      <span>Daily Bonus</span>
-    </div>
-    
-    <button class="btn btn-warning" onclick="claimBonus()">
-      <i class="fas fa-gift"></i> Claim $0.10
-    </button>
-  </div>
-</div>
-
-<!-- EARN SECTION -->
-<div id="earnSection" class="section">
-  <div class="card">
-    <div class="card-title">
-      <i class="fas fa-coins" style="color: gold;"></i>
-      <span>Earn Money</span>
-    </div>
-    
-    <div class="progress-info">
-      <span>Completed</span>
-      <span id="earnProgressText">0/100</span>
-    </div>
-    
-    <div class="progress-bar">
-      <div class="progress-fill" id="earnProgressBar" style="width: 0%"></div>
-    </div>
-    
-    <div class="task-visual" id="earnTaskVisual"></div>
-    
-    <div class="info-row">
-      <span>Per Task</span>
-      <span style="color: gold;">$0.025</span>
-    </div>
-    
-    <div class="info-row">
-      <span>Bonus (100 tasks)</span>
-      <span style="color: gold;">$1.00</span>
-    </div>
-    
-    <button class="btn btn-primary" onclick="startTask()">
-      <i class="fas fa-play"></i> Complete Task
-    </button>
-  </div>
-</div>
-
-<!-- WITHDRAW SECTION -->
-<div id="withdrawSection" class="section">
-  <div class="card">
-    <div class="card-title">
-      <i class="fas fa-money-bill-wave" style="color: gold;"></i>
-      <span>Withdraw</span>
-    </div>
-    
-    <div class="info-row">
-      <span>Available</span>
-      <span id="availableBalance" style="color: gold;">$0.00</span>
-    </div>
-    
-    <div class="info-row">
-      <span>Withdrawn</span>
-      <span id="withdrawnTotal">$0.00</span>
-    </div>
-    
-    <div class="info-row">
-      <span>Min. Withdrawal</span>
-      <span style="color: gold;">$30.00</span>
-    </div>
-    
-    <div class="info-row">
-      <span>Referrals Required</span>
-      <span id="requiredReferrals">0/10</span>
-    </div>
-    
-    <input type="number" id="withdrawAmount" placeholder="Enter amount ($30 min)" min="30" step="0.01">
-    
-    <select id="withdrawMethod">
-      <option>Select Method</option>
-      <option>PayPal</option>
-      <option>Bitcoin</option>
-      <option>Bank Transfer</option>
-    </select>
-    
-    <input type="text" id="withdrawAddress" placeholder="Payment Address/Email">
-    
-    <button class="btn btn-primary" onclick="withdraw()">
-      <i class="fas fa-paper-plane"></i> Submit
-    </button>
-  </div>
-</div>
-
-<!-- PROFILE SECTION -->
-<div id="profileSection" class="section">
-  <div class="card">
-    <div class="card-title">
-      <i class="fas fa-user" style="color: gold;"></i>
-      <span>Profile</span>
-    </div>
-    
-    <div class="profile-row">
-      <div class="profile-pic">
-        <img id="profilePageImage" src="https://via.placeholder.com/80">
-      </div>
-      <div class="profile-name">
-        <h3 id="profilePageName"></h3>
-        <p>@<span id="profileUsername"></span></p>
-      </div>
-    </div>
-    
-    <div class="info-row">
-      <span>User ID</span>
-      <span id="profilePageId"></span>
-    </div>
-    
-    <div class="info-row">
-      <span>Joined</span>
-      <span id="joinDate"></span>
-    </div>
-  </div>
-  
-  <!-- Referral Card -->
-  <div class="card">
-    <div class="card-title">
-      <i class="fas fa-users" style="color: gold;"></i>
-      <span>Referral Program</span>
-    </div>
-    
-    <div class="referral-box">
-      <div style="text-align: center; margin-bottom: 10px;">
-        <strong>Earn $1.00 per referral!</strong>
+    <div class="loader-section">
+      <div class="orbital-loader">
+        <div class="orbit orbit-1"></div>
+        <div class="orbit orbit-2"></div>
+        <div class="orbit orbit-3"></div>
+        <div class="central-orb"></div>
       </div>
       
-      <div class="referral-link" id="referralLink">Loading...</div>
+      <div class="status-display">
+        <div class="countdown-timer" id="countdown">08</div>
+        <div class="status-text" id="statusText">প্রস্তুত করা হচ্ছে...</div>
+      </div>
       
-      <button class="btn btn-secondary" onclick="copyLink()">
-        <i class="fas fa-copy"></i> Copy Link
+      <div class="progress-wrapper">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+    
+    <div class="action-panel">
+      <button class="action-btn primary-btn" id="accessBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M13 3L20 3L20 10"></path>
+          <path d="M20 3L11 12"></path>
+          <path d="M20 13V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V7C4 5.89543 4.89543 5 6 5H12"></path>
+        </svg>
+        এখনই অ্যাক্সেস করুন
       </button>
       
-      <button class="btn btn-warning" onclick="shareLink()">
-        <i class="fas fa-share"></i> Share
+      <button class="action-btn secondary-btn" id="waitBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        অপেক্ষা করুন
       </button>
     </div>
     
-    <div class="stats-grid">
-      <div class="stat-box">
-        <div class="stat-number" id="profileReferrals">0</div>
-        <div class="stat-label">Referrals</div>
+    <div class="info-box">
+      <div class="info-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        অফার সম্পর্কে তথ্য
       </div>
-      <div class="stat-box">
-        <div class="stat-number" id="referralEarnings">$0.00</div>
-        <div class="stat-label">Earned</div>
-      </div>
+      <p class="info-text">
+        • এই অফারটি সীমিত সময়ের জন্য প্রযোজ্য<br>
+        • স্বয়ংক্রিয় রিডাইরেক্ট: <span id="timeLeft">8</span> সেকেন্ড<br>
+        • 100% নিরাপদ এবং সুরক্ষিত<br>
+        • কোন ব্যক্তিগত তথ্য প্রয়োজন নেই
+      </p>
     </div>
     
-    <div style="margin-top: 20px;">
-      <h4 style="margin-bottom: 10px;">
-        <i class="fas fa-history"></i> Referral History
-      </h4>
-      <div id="referralHistory"></div>
+    <div class="footer">
+      <p>© ২০২৬ প্রিমিয়াম অফারস | সর্বসত্ত্ব সংরক্ষিত</p>
+      <p style="margin-top: 5px; font-size: 11px; opacity: 0.7;">স্বয়ংক্রিয়ভাবে সেরা অফার নির্বাচন করা হয়েছে</p>
     </div>
   </div>
-</div>
 
-<!-- Bottom Navigation -->
-<div class="bottom-nav">
-  <div class="nav-item active" onclick="switchSection('home')">
-    <i class="fas fa-home"></i>
-    <span>Home</span>
-  </div>
-  <div class="nav-item" onclick="switchSection('earn')">
-    <i class="fas fa-coins"></i>
-    <span>Earn</span>
-  </div>
-  <div class="nav-item" onclick="switchSection('withdraw')">
-    <i class="fas fa-wallet"></i>
-    <span>Withdraw</span>
-  </div>
-  <div class="nav-item" onclick="switchSection('profile')">
-    <i class="fas fa-user"></i>
-    <span>Profile</span>
-  </div>
-</div>
-
-<script>
-    // ===========================================
-    // শুধু এই অংশটুকু পরিবর্তন করুন
-    // ===========================================
-    const BOT_USERNAME = "Babu24Bot";  // আপনার বটের ইউজারনেম দিন
+  <script>
+    // 🔗 আপনার SINGLE Adsterra Direct লিংকটি এখানে বসান
+    const AD_LINK = "https://www.effectivegatecpm.com/jn7e4nkuc?key=66e9be063c4c78769d7271cd2d8cb5fc";
+    const AD_NAME = "প্রিমিয়াম ডিসকাউন্ট অফার";
     
-    // ===========================================
-    // গ্লোবাল ভেরিয়েবল
-    // ===========================================
-    let currentUser = null;
-    let taskData = {
-        completed: 0,
-        remaining: 100,
-        todayEarned: 0
-    };
+    // DOM Elements
+    const countdownEl = document.getElementById('countdown');
+    const statusTextEl = document.getElementById('statusText');
+    const progressFillEl = document.getElementById('progressFill');
+    const timeLeftEl = document.getElementById('timeLeft');
+    const accessBtn = document.getElementById('accessBtn');
+    const waitBtn = document.getElementById('waitBtn');
     
-    let tg = window.Telegram?.WebApp;
-    if (tg) {
-        tg.ready();
-        tg.expand();
-        console.log("Telegram WebApp Ready");
+    // Configuration
+    let timeLeft = 8; // seconds
+    let isRedirecting = false;
+    let countdownInterval;
+    
+    // Status messages
+    const statusMessages = [
+      "অফার লোড হচ্ছে...",
+      "ডিসকাউন্ট ভেরিফিকেশন চলছে",
+      "সেরা দাম নিশ্চিত করা হচ্ছে",
+      "প্রসেসিং সম্পন্ন হচ্ছে",
+      "প্রস্তুত! রিডাইরেক্টের জন্য প্রস্তুত"
+    ];
+    
+    let messageIndex = 0;
+    
+    // Redirect function
+    function redirectToOffer() {
+      if (isRedirecting) return;
+      
+      isRedirecting = true;
+      clearInterval(countdownInterval);
+      
+      // Update UI
+      countdownEl.textContent = "00";
+      statusTextEl.textContent = "রিডাইরেক্ট করা হচ্ছে...";
+      progressFillEl.style.width = "100%";
+      timeLeftEl.textContent = "0";
+      
+      // Add redirect animation
+      countdownEl.style.color = "#EC4899";
+      
+      // Redirect after 0.5 seconds
+      setTimeout(() => {
+        window.location.href = AD_LINK;
+      }, 500);
     }
-
-    // ===========================================
-    // পেজ লোড হলে
-    // ===========================================
-    window.addEventListener('DOMContentLoaded', function() {
-        initUser();
-        updateDisplay();
-        createTaskDots();
+    
+    // Start countdown
+    function startCountdown() {
+      countdownInterval = setInterval(() => {
+        timeLeft--;
+        
+        // Update countdown display
+        countdownEl.textContent = timeLeft.toString().padStart(2, '0');
+        timeLeftEl.textContent = timeLeft.toString();
+        
+        // Update progress bar
+        const progress = 100 - ((timeLeft / 8) * 100);
+        progressFillEl.style.width = `${progress}%`;
+        
+        // Update status message every 1.5 seconds
+        if ((8 - timeLeft) % 1.5 === 0) {
+          statusTextEl.textContent = statusMessages[messageIndex % statusMessages.length];
+          messageIndex++;
+        }
+        
+        // Change color for last 3 seconds
+        if (timeLeft <= 3) {
+          countdownEl.style.color = "#EC4899";
+        }
+        
+        // Redirect when time is up
+        if (timeLeft <= 0) {
+          redirectToOffer();
+        }
+      }, 1000);
+    }
+    
+    // Event listeners
+    accessBtn.addEventListener('click', () => {
+      if (confirm(`আপনি কি "${AD_NAME}" অফারে এখনই যেতে চান?`)) {
+        redirectToOffer();
+      }
     });
-
-    // ===========================================
-    // ইউজার ইনিশিয়ালাইজ
-    // ===========================================
-    function initUser() {
-        let user = null;
-        let referrerId = null;
-        
-        // টেলিগ্রাম ইউজার পাওয়ার চেষ্টা
-        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            user = tg.initDataUnsafe.user;
-            
-            // start_param থেকে রেফারেল আইডি নিন
-            if (tg.initDataUnsafe.start_param) {
-                let startParam = tg.initDataUnsafe.start_param;
-                console.log("Start param:", startParam);
-                
-                if (startParam.startsWith('ref_')) {
-                    referrerId = startParam.replace('ref_', '');
-                    console.log("Referrer found:", referrerId);
-                }
-            }
-        } else {
-            // ডেমো ইউজার
-            user = {
-                id: Math.floor(Math.random() * 1000000),
-                first_name: "Demo",
-                last_name: "User",
-                username: "demo_user",
-                photo_url: "https://via.placeholder.com/80"
-            };
-        }
-        
-        // ইউজার ডাটা লোড বা তৈরি
-        let storageKey = `user_${user.id}`;
-        let saved = localStorage.getItem(storageKey);
-        
-        if (saved) {
-            currentUser = JSON.parse(saved);
-            console.log("User loaded:", currentUser);
-        } else {
-            currentUser = {
-                id: user.id,
-                firstName: user.first_name,
-                lastName: user.last_name || '',
-                username: user.username || '',
-                photo: user.photo_url || 'https://via.placeholder.com/80',
-                balance: 0,
-                withdrawn: 0,
-                tasks: 0,
-                referrals: 0,
-                referralEarned: 0,
-                referralHistory: [],
-                joinDate: new Date().toISOString()
-            };
-            
-            // রেফারেল প্রসেস
-            if (referrerId && referrerId != user.id) {
-                console.log("Processing referral from:", referrerId);
-                processReferral(referrerId, user.id);
-            }
-            
-            localStorage.setItem(storageKey, JSON.stringify(currentUser));
-        }
-        
-        // টাস্ক ডাটা লোড
-        let today = new Date().toDateString();
-        let taskKey = `tasks_${user.id}_${today}`;
-        let savedTasks = localStorage.getItem(taskKey);
-        
-        if (savedTasks) {
-            taskData = JSON.parse(savedTasks);
-        } else {
-            taskData = {
-                completed: 0,
-                remaining: 100,
-                todayEarned: 0
-            };
-            localStorage.setItem(taskKey, JSON.stringify(taskData));
-        }
-    }
-
-    // ===========================================
-    // রেফারেল প্রসেস
-    // ===========================================
-    function processReferral(referrerId, newUserId) {
-        let referrerKey = `user_${referrerId}`;
-        let referrerData = localStorage.getItem(referrerKey);
-        
-        if (referrerData) {
-            let referrer = JSON.parse(referrerData);
-            
-            // চেক করুন আগে রেফার হয়েছে কিনা
-            let already = referrer.referralHistory ? 
-                referrer.referralHistory.some(r => r.id == newUserId) : false;
-            
-            if (!already) {
-                referrer.referrals = (referrer.referrals || 0) + 1;
-                referrer.balance = (referrer.balance || 0) + 1.00;
-                referrer.referralEarned = (referrer.referralEarned || 0) + 1.00;
-                
-                if (!referrer.referralHistory) referrer.referralHistory = [];
-                
-                referrer.referralHistory.push({
-                    id: newUserId,
-                    earned: 0,
-                    date: new Date().toISOString()
-                });
-                
-                localStorage.setItem(referrerKey, JSON.stringify(referrer));
-                console.log("Referral added for:", referrerId);
-                
-                // নোটিফিকেশন দেখান
-                if (currentUser && referrerId != currentUser.id) {
-                    alert("🎉 You got a new referral! $1.00 added!");
-                }
-            }
-        } else {
-            // পেন্ডিং হিসেবে রাখুন
-            let pending = JSON.parse(localStorage.getItem('pending_refs') || '[]');
-            pending.push({ referrer: referrerId, user: newUserId });
-            localStorage.setItem('pending_refs', JSON.stringify(pending));
-        }
-    }
-
-    // ===========================================
-    // পেন্ডিং রেফারেল চেক
-    // ===========================================
-    function checkPending() {
-        if (!currentUser) return;
-        
-        let pending = JSON.parse(localStorage.getItem('pending_refs') || '[]');
-        let newPending = [];
-        let updated = false;
-        
-        pending.forEach(p => {
-            if (p.referrer == currentUser.id) {
-                if (!currentUser.referralHistory) currentUser.referralHistory = [];
-                
-                let exists = currentUser.referralHistory.some(r => r.id == p.user);
-                
-                if (!exists) {
-                    currentUser.referrals++;
-                    currentUser.balance += 1.00;
-                    currentUser.referralEarned += 1.00;
-                    
-                    currentUser.referralHistory.push({
-                        id: p.user,
-                        earned: 0,
-                        date: p.date || new Date().toISOString()
-                    });
-                    
-                    updated = true;
-                }
-            } else {
-                newPending.push(p);
-            }
-        });
-        
-        if (updated) {
-            localStorage.setItem(`user_${currentUser.id}`, JSON.stringify(currentUser));
-            localStorage.setItem('pending_refs', JSON.stringify(newPending));
-            updateDisplay();
-        }
-    }
-
-    // ===========================================
-    // টাস্ক কমপ্লিট হলে
-    // ===========================================
-    function updateReferralEarnings(userId, amount) {
-        // সব ইউজার চেক করুন
-        for (let i = 0; i < localStorage.length; i++) {
-            let key = localStorage.key(i);
-            if (key.startsWith('user_')) {
-                try {
-                    let user = JSON.parse(localStorage.getItem(key));
-                    
-                    if (user.referralHistory) {
-                        let updated = false;
-                        
-                        user.referralHistory.forEach(ref => {
-                            if (ref.id == userId) {
-                                ref.earned = (ref.earned || 0) + amount;
-                                updated = true;
-                            }
-                        });
-                        
-                        if (updated) {
-                            localStorage.setItem(key, JSON.stringify(user));
-                        }
-                    }
-                } catch(e) {}
-            }
-        }
-    }
-
-    // ===========================================
-    // ডিসপ্লে আপডেট
-    // ===========================================
-    function updateDisplay() {
-        if (!currentUser) return;
-        
-        let available = (currentUser.balance - currentUser.withdrawn).toFixed(2);
-        
-        // Header
-        document.getElementById('headerBalance').innerText = '$' + available;
-        
-        // Home
-        document.getElementById('profileImage').src = currentUser.photo;
-        document.getElementById('userName').innerText = currentUser.firstName + ' ' + currentUser.lastName;
-        document.getElementById('userId').innerText = currentUser.id;
-        document.getElementById('todayEarn').innerText = '$' + taskData.todayEarned.toFixed(2);
-        document.getElementById('totalEarn').innerText = '$' + currentUser.balance.toFixed(2);
-        document.getElementById('totalTasks').innerText = currentUser.tasks || 0;
-        document.getElementById('totalReferrals').innerText = currentUser.referrals || 0;
-        
-        // Tasks
-        let percent = (taskData.completed / 100) * 100;
-        document.getElementById('taskProgressBar').style.width = percent + '%';
-        document.getElementById('taskProgressText').innerText = taskData.completed + '/100';
-        document.getElementById('earnProgressBar').style.width = percent + '%';
-        document.getElementById('earnProgressText').innerText = taskData.completed + '/100';
-        
-        // Withdraw
-        document.getElementById('availableBalance').innerText = '$' + available;
-        document.getElementById('withdrawnTotal').innerText = '$' + currentUser.withdrawn.toFixed(2);
-        document.getElementById('requiredReferrals').innerText = (currentUser.referrals || 0) + '/10';
-        
-        // Profile
-        document.getElementById('profilePageImage').src = currentUser.photo;
-        document.getElementById('profilePageName').innerText = currentUser.firstName + ' ' + currentUser.lastName;
-        document.getElementById('profileUsername').innerText = currentUser.username || 'user' + currentUser.id;
-        document.getElementById('profilePageId').innerText = currentUser.id;
-        
-        let join = new Date(currentUser.joinDate);
-        document.getElementById('joinDate').innerText = join.toLocaleDateString();
-        
-        // Referral
-        let link = `https://t.me/${BOT_USERNAME}?start=ref_${currentUser.id}`;
-        document.getElementById('referralLink').innerText = link;
-        document.getElementById('profileReferrals').innerText = currentUser.referrals || 0;
-        document.getElementById('referralEarnings').innerText = '$' + (currentUser.referralEarned || 0).toFixed(2);
-        
-        // History
-        showReferralHistory();
-        
-        // Task dots
-        updateTaskDots();
-    }
-
-    // ===========================================
-    // টাস্ক ডট তৈরি
-    // ===========================================
-    function createTaskDots() {
-        let home = document.getElementById('taskVisual');
-        let earn = document.getElementById('earnTaskVisual');
-        
-        home.innerHTML = '';
-        earn.innerHTML = '';
-        
-        for (let i = 0; i < 100; i++) {
-            let dot = document.createElement('div');
-            dot.className = 'task-dot';
-            dot.id = 'dot_' + i;
-            home.appendChild(dot.cloneNode());
-            earn.appendChild(dot.cloneNode());
-        }
-    }
     
-    function updateTaskDots() {
-        for (let i = 0; i < taskData.completed; i++) {
-            let dot1 = document.getElementById('dot_' + i);
-            let dot2 = document.getElementById('earnDot_' + i);
-            if (dot1) dot1.classList.add('completed');
-            if (dot2) dot2.classList.add('completed');
-        }
-    }
-
-    // ===========================================
-    // রেফারেল হিস্টোরি
-    // ===========================================
-    function showReferralHistory() {
-        let history = document.getElementById('referralHistory');
-        
-        if (!currentUser.referralHistory || currentUser.referralHistory.length == 0) {
-            history.innerHTML = '<div style="text-align:center; opacity:0.5;">No referrals yet</div>';
-            return;
-        }
-        
-        history.innerHTML = '';
-        
-        currentUser.referralHistory.forEach(ref => {
-            let item = document.createElement('div');
-            item.className = 'history-item';
-            
-            let percent = (ref.earned / 30) * 100;
-            let status = percent >= 100 ? 'Completed' : 'Active';
-            let badge = percent >= 100 ? 'badge-success' : 'badge-warning';
-            
-            item.innerHTML = `
-                <div>
-                    <div><strong>User #${ref.id}</strong></div>
-                    <div style="font-size:12px;">Earned: $${ref.earned.toFixed(2)}</div>
-                </div>
-                <div class="badge ${badge}">${status}</div>
-            `;
-            
-            history.appendChild(item);
-        });
-    }
-
-    // ===========================================
-    // টাস্ক স্টার্ট
-    // ===========================================
-    function startTask() {
-        if (taskData.completed >= 100) {
-            alert('✅ All tasks completed for today!');
-            return;
-        }
-        
-        let start = Date.now();
-        let win = window.open('https://www.google.com', '_blank');
-        
-        if (!win) {
-            alert('⚠️ Please allow popups!');
-            return;
-        }
-        
-        let check = setInterval(() => {
-            if (win.closed) {
-                clearInterval(check);
-                let time = (Date.now() - start) / 1000;
-                
-                if (time >= 3) { // টেস্টের জন্য ৩ সেকেন্ড
-                    taskData.completed++;
-                    taskData.todayEarned += 0.025;
-                    currentUser.balance += 0.025;
-                    currentUser.tasks++;
-                    
-                    // রেফারেল আপডেট
-                    updateReferralEarnings(currentUser.id, 0.025);
-                    
-                    // সেভ
-                    let today = new Date().toDateString();
-                    localStorage.setItem(`tasks_${currentUser.id}_${today}`, JSON.stringify(taskData));
-                    localStorage.setItem(`user_${currentUser.id}`, JSON.stringify(currentUser));
-                    
-                    updateDisplay();
-                    alert('✅ +$0.025 earned!');
-                    
-                    // বোনাস চেক
-                    if (taskData.completed == 100) {
-                        currentUser.balance += 1.00;
-                        localStorage.setItem(`user_${currentUser.id}`, JSON.stringify(currentUser));
-                        updateDisplay();
-                        alert('🎉 Bonus $1.00 earned!');
-                    }
-                } else {
-                    alert('⏱️ Please stay longer!');
-                }
-            }
-        }, 500);
-    }
-
-    // ===========================================
-    // বোনাস ক্লেইম
-    // ===========================================
-    function claimBonus() {
-        let last = localStorage.getItem(`bonus_${currentUser.id}`);
-        let today = new Date().toDateString();
-        
-        if (last == today) {
-            alert('⚠️ Already claimed today!');
-            return;
-        }
-        
-        currentUser.balance += 0.10;
-        taskData.todayEarned += 0.10;
-        
-        localStorage.setItem(`bonus_${currentUser.id}`, today);
-        localStorage.setItem(`user_${currentUser.id}`, JSON.stringify(currentUser));
-        
-        let taskKey = `tasks_${currentUser.id}_${today}`;
-        localStorage.setItem(taskKey, JSON.stringify(taskData));
-        
-        updateDisplay();
-        alert('🎁 +$0.10 bonus claimed!');
-    }
-
-    // ===========================================
-    // উইথড্র
-    // ===========================================
-    function withdraw() {
-        let amount = parseFloat(document.getElementById('withdrawAmount').value);
-        let method = document.getElementById('withdrawMethod').value;
-        let address = document.getElementById('withdrawAddress').value;
-        
-        let available = currentUser.balance - currentUser.withdrawn;
-        
-        if (!amount || amount < 30) {
-            alert('Minimum $30 required!');
-            return;
-        }
-        
-        if (amount > available) {
-            alert('Insufficient balance!');
-            return;
-        }
-        
-        if ((currentUser.referrals || 0) < 10) {
-            alert('Need 10 referrals to withdraw!');
-            return;
-        }
-        
-        if (method == 'Select Method') {
-            alert('Select payment method!');
-            return;
-        }
-        
-        if (!address) {
-            alert('Enter payment address!');
-            return;
-        }
-        
-        currentUser.withdrawn += amount;
-        localStorage.setItem(`user_${currentUser.id}`, JSON.stringify(currentUser));
-        
-        updateDisplay();
-        alert('✅ Withdrawal request submitted!');
-        
-        // ফর্ম রিসেট
-        document.getElementById('withdrawAmount').value = '';
-        document.getElementById('withdrawMethod').value = 'Select Method';
-        document.getElementById('withdrawAddress').value = '';
-    }
-
-    // ===========================================
-    // লিংক কপি
-    // ===========================================
-    function copyLink() {
-        let link = `https://t.me/${BOT_USERNAME}?start=ref_${currentUser.id}`;
-        navigator.clipboard.writeText(link).then(() => {
-            alert('✅ Link copied!');
-        });
-    }
+    waitBtn.addEventListener('click', () => {
+      const waitMessages = [
+        `অফারটি ${timeLeft} সেকেন্ডের মধ্যে লোড হবে`,
+        "আপনার ধৈর্যের জন্য ধন্যবাদ!",
+        "সেরা অফারটি আপনার জন্য অপেক্ষা করছে",
+        "কিছুক্ষণ অপেক্ষা করুন, এটি মূল্যবান হবে"
+      ];
+      
+      const randomMsg = waitMessages[Math.floor(Math.random() * waitMessages.length)];
+      alert(randomMsg);
+    });
     
-    function shareLink() {
-        let link = `https://t.me/${BOT_USERNAME}?start=ref_${currentUser.id}`;
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      // Add entrance animation
+      document.querySelector('.glass-container').style.animation = 'fadeIn 0.8s ease';
+      
+      // Start countdown
+      startCountdown();
+      
+      // Add mouse move effect
+      document.addEventListener('mousemove', (e) => {
+        const x = (e.clientX / window.innerWidth) * 20 - 10;
+        const y = (e.clientY / window.innerHeight) * 20 - 10;
         
-        if (tg) {
-            tg.openTelegramLink(link);
-        } else {
-            copyLink();
-        }
-    }
-
-    // ===========================================
-    // সেকশন সুইচ
-    // ===========================================
-    function switchSection(section) {
-        // সব সেকশন হাইড
-        document.getElementById('homeSection').classList.remove('active');
-        document.getElementById('earnSection').classList.remove('active');
-        document.getElementById('withdrawSection').classList.remove('active');
-        document.getElementById('profileSection').classList.remove('active');
-        
-        // সিলেক্টেড সেকশন দেখান
-        document.getElementById(section + 'Section').classList.add('active');
-        
-        // নেভিগেশন আপডেট
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        event.currentTarget.classList.add('active');
-        
-        // প্রোফাইলে পেন্ডিং চেক
-        if (section == 'profile') {
-            checkPending();
-        }
-    }
-
-    // ===========================================
-    // ডিবাগ টুলস
-    // ===========================================
-    window.debug = {
-        status: function() {
-            console.log('Current User:', currentUser);
-            console.log('Task Data:', taskData);
-            console.log('Bot:', BOT_USERNAME);
-            
-            let pending = JSON.parse(localStorage.getItem('pending_refs') || '[]');
-            console.log('Pending:', pending);
-        },
-        addReferral: function(id) {
-            processReferral(id, currentUser.id);
-            alert('Test referral added from ' + id);
-        }
-    };
+        document.querySelector('.glass-container').style.transform = 
+          `perspective(1000px) rotateY(${x}deg) rotateX(${-y}deg)`;
+      });
+      
+      // Reset transform on mouse leave
+      document.addEventListener('mouseleave', () => {
+        document.querySelector('.glass-container').style.transform = 
+          'perspective(1000px) rotateY(0deg) rotateX(0deg)';
+      });
+    });
     
-    console.log('✅ System Ready! Type "debug.status()" to check');
-</script>
+    // Disable effects on mobile
+    if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+      document.querySelector('.glass-container').style.transform = 'none';
+    }
+  </script>
 </body>
 </html>
+
+<script
+  type="text/javascript"
+  src="https://pl26607619.effectivegatecpm.com/89/be/eb/89beeb153f91b5aec28bb0d98b62029c.js"
+></script>
