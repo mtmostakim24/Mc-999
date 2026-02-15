@@ -894,11 +894,8 @@
           <label class="input-label">Payment Method</label>
           <select id="withdraw-method">
             <option>Select a method</option>
-            <option>PayPal</option>
-            <option>Bitcoin</option>
-            <option>Bank Transfer</option>
-            <option>Skrill</option>
-            <option>Payoneer</option>
+            <option>Bkash</option>
+            <option>Nagad</option>
           </select>
         </div>
 
@@ -917,7 +914,7 @@
     <div id="earn" class="cards-container" style="display: none;">
       <div class="card">
         <div class="card-header">
-          <i class="fas fa-dollar-sign"></i>
+          <i class="fas fa-taka-sign"></i>
           <h3>Earn More</h3>
         </div>
         
@@ -1280,7 +1277,7 @@
       document.getElementById("member-since").textContent = joinDate.toLocaleDateString();
 
       // Referral
-      const refLink = `https://t.me/Spin_Dhora24_Bot?start=ref_${userData.userId}`;
+      const refLink = `https://t.me/TaskTycoon_Bot?start=ref_${userData.userId}`;
       document.getElementById("referral-link").textContent = refLink;
       document.getElementById("total-referrals").textContent = userData.referrals || 0;
       document.getElementById("referral-earnings").textContent = (userData.referralEarnings || 0).toFixed(2);
@@ -1367,9 +1364,9 @@
 
     // Task links
     const taskLinks = [
-      "https://mc-999.vercel.app",
-      "https://mc-999.vercel.app",
-      "https://mc-999.vercel.app",
+      "https://task-tycoon-bot.vercel.app",
+      "https://task-tycoon-bot.vercel.app",
+      "https://task-tycoon-bot.vercel.app",
     ];
 
     // Show notification
@@ -1463,7 +1460,7 @@
         showNotification("Please enter a valid amount", "error");
         return;
       }
-      if (amount < 01) {
+      if (amount < 1500) {
         showNotification("Minimum withdrawal amount is ৳1500", "error");
         return;
       }
@@ -1471,7 +1468,7 @@
         showNotification("Insufficient balance", "error");
         return;
       }
-      if ((userData.referrals || 0) < 00) {
+      if ((userData.referrals || 0) < 10) {
         showNotification("You need at least 10 referrals to withdraw", "error");
         return;
       }
@@ -1573,7 +1570,7 @@
     function copyReferralLink() {
       if (!userData) return;
       
-      const refLink = `https://t.me/Spin_Dhora24_Bot?start=ref_${userData.userId}`;
+      const refLink = `https://t.me/TaskTycoon_Bot?start=ref_${userData.userId}`;
       navigator.clipboard.writeText(refLink)
         .then(() => showNotification("✅ Referral link copied! Share it to earn ৳55 per referral.", "success"))
         .catch(() => showNotification("Failed to copy link", "error"));
@@ -1583,7 +1580,7 @@
     function shareReferralLink() {
       if (!userData) return;
       
-      const refLink = `https://t.me/Spin_Dhora24_Bot?start=ref_${userData.userId}`;
+      const refLink = `https://t.me/TaskTycoon_Bot?start=ref_${userData.userId}`;
       
       if (window.Telegram && window.Telegram.WebApp) {
         Telegram.WebApp.openTelegramLink(refLink);
